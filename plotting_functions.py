@@ -4,6 +4,24 @@ import matplotlib.pyplot as plt
 
 L_VAPOR      = 2.5e-3   # length of the vapor grid [m]
 PLOT_RHO_MIN = 1e-5     # cells below this density [kg/m^3] count as vacuum and are not drawn
+M_CU         = 1.055e-25  # copper atom mass [kg]
+
+# colorblind-checked categorical colors, used in this order
+SERIES_COLORS = ['#2a78d6', '#eb6834', '#1baf7a', '#eda100']
+
+
+def x_mm_axis(nx):
+    """Cell-centre positions of the vapor grid in mm."""
+    return (np.arange(nx) + 0.5) * (L_VAPOR / nx) * 1e3
+
+
+def style_axes(ax, xlabel, ylabel):
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
+    ax.grid(True, color='0.9', lw=0.6)
+    ax.set_axisbelow(True)
+    for side in ('top', 'right'):
+        ax.spines[side].set_visible(False)
 
 
 def plume_mask(rho_i, rho_min=PLOT_RHO_MIN):
@@ -37,8 +55,7 @@ def frames_to_plot(n_frames, every=4):
 
 def plot_profiles(ax, field, rho, times, ylabel, every=4, rho_min=PLOT_RHO_MIN, logy=False):
     """Plot spatial profiles of `field` (shape [n_frames, nx]) at several times, plume only."""
-    nx = field.shape[1]
-    x_mm = (np.arange(nx) + 0.5) * (L_VAPOR / nx) * 1e3
+    x_mm = x_mm_axis(field.shape[1])
 
     frames = frames_to_plot(len(times), every)
     # times are ordered, so use one hue from light (early) to dark (late)
@@ -57,12 +74,7 @@ def plot_profiles(ax, field, rho, times, ylabel, every=4, rho_min=PLOT_RHO_MIN, 
     if logy:
         ax.set_yscale('log')
 
-    ax.set_xlabel('Distance from target (mm)')
-    ax.set_ylabel(ylabel)
-    ax.grid(True, color='0.9', lw=0.6)
-    ax.set_axisbelow(True)
-    for side in ('top', 'right'):
-        ax.spines[side].set_visible(False)
+    style_axes(ax, 'Distance from target (mm)', ylabel)
     ax.legend(title='Time', frameon=False, fontsize=9)
 
 
